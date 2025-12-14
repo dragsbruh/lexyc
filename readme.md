@@ -5,15 +5,15 @@
 this is an alternate compiler for a superset of the [xy](https://git.disroot.org/nora.aoki/xy)
 programming language.
 
-| instruction | what is this                               |
-| ----------- | ------------------------------------------ |
-| `+`         | increment `x` by 1                         |
-| `-`         | decrement `x` by 1.                        |
-| `s`         | swap `x` and `y`                           |
-| `[`         | if `x == 0`, jump to the matching `]`.     |
-| `]`         | if `x != 0`, jump back to the matching `[` |
-| `o`         | dump all 64 bits of `x` raw to stdout      |
-| `0`         | set `x` to 0                               |
+| instruction | what is this                                                        |
+| ----------- | ------------------------------------------------------------------- |
+| `+`         | increment `x` by 1                                                  |
+| `-`         | decrement `x` by 1.                                                 |
+| `s`         | swap `x` and `y`                                                    |
+| `[`         | if `x == 0`, jump to the instruction after the matching `]`.        |
+| `]`         | if `x != 0`, jump to the instruction after back to the matching `[` |
+| `o`         | dump all 64 bits of `x` raw to stdout                               |
+| `0`         | set `x` to 0                                                        |
 
 **notes:**
 
@@ -31,9 +31,16 @@ programming language.
 | `risc-v`      | 🚧 planned                          |                        |
 | `javascript`  | 🚧 planned (blazingly fast)         |                        |
 
+## features
+
+- dump buffering
+- `inc`/`dec` grouping
+- interpreter and debugging support
+
 ## todo
 
-- [ ] buffer dumps, 1000 syscalls per second is crazy
+- [x] buffer dumps, 1000 syscalls per second is crazy
+  - [ ] custom buffer size (1028 by default)
 - [ ] windows, freebsd, mac targets for nasm
 - [ ] llvm backend
 - [ ] native backends for linux
