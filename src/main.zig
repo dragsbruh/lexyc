@@ -21,10 +21,22 @@ pub fn main() !u8 {
             std.debug.print("  {s}\n", .{f.name});
 
             const backend_type: Backend.Type = @enumFromInt(f.value);
-            const supported_targets = if (backend_type == .interpreter) .{} else Backend.get(backend_type).supported();
+            const supported_targets = Backend.get(backend_type).supported();
 
             for (supported_targets) |target| std.debug.print("    {s}\n", .{@tagName(target)});
         }
+
+        std.debug.print(
+            \\examples:
+            \\  lexyc file.xy nasm-linux_x86_64 -           # prints asm to stdout
+            \\  lexyc file.xy nasm-linux_x86_32 file.s      # writes asm to file
+            \\  lexyc file.xy interpreter -                 # interprets the code and prints to stdout
+            \\  lexyc file.xy interpreter-debug debug.txt   # interprets the code and every step writes debug information to file
+            \\  lexyc file.xy debug -                       # tokenizes the code and writes token debug information to stdout
+            \\notes:
+            \\  outfile is optional, it will default to stdout
+            \\
+        , .{});
 
         return 0;
     }
