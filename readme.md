@@ -31,6 +31,27 @@ programming language.
 | `risc-v`      | 🚧 planned                          |                        |
 | `javascript`  | 🚧 planned (blazingly fast)         |                        |
 
+## usage
+
+```sh
+usage: `lexyc <file> <backend> [out-file]`
+available backends and their supported targets:
+  nasm
+    linux_x86_64
+    linux_x86_32
+  interpreter
+    debug
+  debug
+examples:
+  lexyc file.xy nasm-linux_x86_64 -           # prints asm to stdout
+  lexyc file.xy nasm-linux_x86_32 file.s      # writes asm to file
+  lexyc file.xy interpreter -                 # interprets the code and prints to stdout
+  lexyc file.xy interpreter-debug debug.txt   # interprets the code and every step writes debug information to file
+  lexyc file.xy debug -                       # tokenizes the code and writes token debug information to stdout
+notes:
+  outfile is optional, it will default to stdout
+```
+
 ## features
 
 - dump buffering
