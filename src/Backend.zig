@@ -30,7 +30,7 @@ pub const backends = struct {
 
 pub const Ins = @import("instructions.zig").Ins;
 
-pub const Target = enum { linux_x86_64, linux_x86_32, linux_arm_32, linux_arm_64 };
+pub const Target = enum { linux_x86_64, linux_x86_32, linux_arm_32, linux_arm_64, debug }; // debug is a special target, i only plan to use it with interpreter-debug to get detailed information per-step
 pub const Type = enum { nasm, interpreter, debug };
 
 compile: *const fn (allocator: std.mem.Allocator, writer: *std.Io.Writer, target: ?Target, instructions: []Ins) anyerror!void,

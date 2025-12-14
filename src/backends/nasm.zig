@@ -16,16 +16,27 @@ pub fn compile(_: std.mem.Allocator, out: *std.Io.Writer, maybe_target: ?Backend
             // we arent using esi or ebp so good
             \\%define xr esi
             \\%define yr ebp
+            \\%define bl edi
+            \\%define buf_size 1024
             \\section .bss
-            \\  outs resb 1
+            \\  outs resb buf_size
             \\section .text
-            \\print:
+            \\flush:
             \\  mov eax, 4
             \\  mov ebx, 1
-            \\  mov [outs], xr
             \\  lea ecx, [outs]
-            \\  mov edx, 4
+            \\  mov edx, bl
             \\  int 0x80
+            \\  mov bl, 0
+            \\  ret
+            \\print:
+            \\  cmp bl, buf_size
+            \\  jng noflush
+            \\  call flush
+            \\  ret
+            \\noflush:
+            \\  mov dword [ outs + bl ], xr
+            \\  add bl, 4
             \\  ret
             \\quit:
             \\  mov eax, 1
@@ -37,17 +48,28 @@ pub fn compile(_: std.mem.Allocator, out: *std.Io.Writer, maybe_target: ?Backend
         .linux_x86_64 => try out.print(
             \\global _start
             \\%define xr r12
-            \\%define yr r14
+            \\%define yr r13
+            \\%define bl r14
+            \\%define buf_size 1024
             \\section .bss
-            \\  outs resq 1
+            \\  outs resq buf_size
             \\section .text
-            \\print:
+            \\flush:
             \\  mov rax, 1
             \\  mov rdi, 1
-            \\  mov [rel outs], xr
             \\  lea rsi, [rel outs]
-            \\  mov rdx, 8
+            \\  mov rdx, bl
             \\  syscall
+            \\  mov bl, 0
+            \\  ret
+            \\print:
+            \\  cmp bl, buf_size
+            \\  jng noflush
+            \\  call flush
+            \\  ret
+            \\noflush:
+            \\  mov qword [ outs + bl ], xr
+            \\  add bl, 8
             \\  ret
             \\quit:
             \\  mov rax, 60
@@ -81,7 +103,11 @@ pub fn compile(_: std.mem.Allocator, out: *std.Io.Writer, maybe_target: ?Backend
         };
     }
 
-    try out.print("  jmp quit\n", .{});
+    try out.print(
+        \\  call flush
+        \\  jmp quit
+        \\
+    , .{});
 }
 
 pub fn supports(target: ?Backend.Target) bool {
