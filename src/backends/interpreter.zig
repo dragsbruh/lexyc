@@ -50,7 +50,6 @@ pub fn step(self: *@This(), out: *std.Io.Writer) !bool {
         .print => {
             if (!self.write_debug) try out.writeInt(@TypeOf(self.x), self.x, .little);
         },
-        .zero => self.x = 0,
     }
 
     self.index += 1;

@@ -130,7 +130,6 @@ pub fn compile(_: std.mem.Allocator, out: *std.Io.Writer, maybe_target: ?Backend
             .inc => |amount| out.print("  add xr, {d}\n", .{amount}),
             .dec => |amount| out.print("  sub xr, {d}\n", .{amount}),
             .swap => out.print("  xchg xr, yr\n", .{}),
-            .zero => out.print("  mov xr, 0\n", .{}),
             .print => out.print("  call print\n", .{}),
             .open => |close| out.print(
                 \\br{d}:

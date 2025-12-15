@@ -7,7 +7,6 @@ pub const Ins = union(enum) {
     open: usize, // index of matching close
     close: usize, // index of matching open
     print,
-    zero,
 
     pub fn debug(self: @This(), writer: *std.Io.Writer, index: usize) !void {
         switch (self) {
@@ -75,7 +74,6 @@ pub fn tokenize(allocator: std.mem.Allocator, source: []const u8, open_index: ?u
 
             's' => try instructions.append(allocator, .swap),
             'o' => try instructions.append(allocator, .print),
-            '0' => try instructions.append(allocator, .zero),
 
             '[' => {
                 const result = try tokenize(allocator, source, index + 1);

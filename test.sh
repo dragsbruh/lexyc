@@ -37,8 +37,8 @@ mkdir -p _build/bin/xy
 clang _build/xy/out.ll -o _build/bin/xy/exe -Wno-override-module
 ./_build/bin/xy/exe > _build/out/xy.txt
 
-./_build/deps/xycc examples/helloworld_loop_compat.xy _build/xy/loop-compat-out.ll
-clang _build/xy/loop-compat-out.ll -o _build/bin/xy/loop-compat-exe -Wno-override-module
+./_build/deps/xycc examples/helloworld_loop.xy _build/xy/loop-out.ll
+clang _build/xy/loop-out.ll -o _build/bin/xy/loop-exe -Wno-override-module
 
 # interpreter/debug targets
 
@@ -62,10 +62,6 @@ ld _build/nasm-linux_x86_64/obj.o -o _build/bin/nasm-linux_x86_64/exe
 nasm -f elf64 _build/nasm-linux_x86_64/loop-asm.s -o _build/nasm-linux_x86_64/loop-obj.o
 ld _build/nasm-linux_x86_64/loop-obj.o -o _build/bin/nasm-linux_x86_64/loop-exe
 
-./zig-out/bin/lexyc examples/helloworld_loop_compat.xy nasm-linux_x86_64 _build/nasm-linux_x86_64/loop-compat-asm.s
-nasm -f elf64 _build/nasm-linux_x86_64/loop-compat-asm.s -o _build/nasm-linux_x86_64/loop-compat-obj.o
-ld _build/nasm-linux_x86_64/loop-compat-obj.o -o _build/bin/nasm-linux_x86_64/loop-compat-exe
-
 ## linux_x86_32
 
 mkdir -p _build/nasm-linux_x86_32/
@@ -80,10 +76,6 @@ ld -m elf_i386 _build/nasm-linux_x86_32/obj.o -o _build/bin/nasm-linux_x86_32/ex
 nasm -f elf32 _build/nasm-linux_x86_32/loop-asm.s -o _build/nasm-linux_x86_32/loop-obj.o
 ld -m elf_i386 _build/nasm-linux_x86_32/loop-obj.o -o _build/bin/nasm-linux_x86_32/loop-exe
 
-./zig-out/bin/lexyc examples/helloworld_loop_compat.xy nasm-linux_x86_32 _build/nasm-linux_x86_32/loop-compat-asm.s
-nasm -f elf32 _build/nasm-linux_x86_32/loop-compat-asm.s -o _build/nasm-linux_x86_32/loop-compat-obj.o
-ld -m elf_i386 _build/nasm-linux_x86_32/loop-compat-obj.o -o _build/bin/nasm-linux_x86_32/loop-compat-exe
-
 ## windows_x86_64
 
 mkdir -p _build/nasm-windows_x86_64/
@@ -97,7 +89,3 @@ wine ./_build/bin/nasm-windows_x86_64/exe.exe > _build/out/nasm-windows_x86_64.t
 ./zig-out/bin/lexyc examples/helloworld_loop.xy nasm-windows_x86_64 _build/nasm-windows_x86_64/loop-asm.s
 nasm -f win64 _build/nasm-windows_x86_64/loop-asm.s -o _build/nasm-windows_x86_64/loop-obj.o
 x86_64-w64-mingw32-gcc _build/nasm-windows_x86_64/loop-obj.o -o _build/bin/nasm-windows_x86_64/loop-exe.exe -nostartfiles -lkernel32
-
-./zig-out/bin/lexyc examples/helloworld_loop_compat.xy nasm-windows_x86_64 _build/nasm-windows_x86_64/loop-compat-asm.s
-nasm -f win64 _build/nasm-windows_x86_64/loop-compat-asm.s -o _build/nasm-windows_x86_64/loop-compat-obj.o
-x86_64-w64-mingw32-gcc _build/nasm-windows_x86_64/loop-compat-obj.o -o _build/bin/nasm-windows_x86_64/loop-compat-exe.exe -nostartfiles -lkernel32

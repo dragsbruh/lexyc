@@ -2,8 +2,7 @@
 
 # lexyc
 
-this is an alternate compiler for a superset of the [xy](https://git.disroot.org/nora.aoki/xy)
-programming language.
+this is an alternate compiler for the turing-complete [xy](https://git.disroot.org/nora.aoki/xy) programming language.
 
 | instruction | what is this                                                |
 | ----------- | ----------------------------------------------------------- |
@@ -12,25 +11,23 @@ programming language.
 | `s`         | swap `x` and `y`                                            |
 | `[`         | if `x == 0`, jump to the instruction after the matching `]` |
 | `]`         | if `x != 0`, jump to the instruction after the matching `[` |
-| `o`         | dump all 64 bits of `x` raw to stdout                       |
-| `0`         | set `x` to 0 (deprecated)                                   |
+| `o`         | dump all bits of `x` raw to stdout                          |
 
 ## compiler targets
 
-| target        | status                                   | notes                                               |
-| ------------- | ---------------------------------------- | --------------------------------------------------- |
-| `interpreter` | 🔥 fully supported                       | has nice debugging capabilities                     |
-| `nasm`        | 😀👍 well supported (linux+windows only) | nasm only supports x86(\_64), windows is 64bit only |
-| `x86`         | 🚧 planned                               |                                                     |
-| `arm`         | 🚧 planned                               |                                                     |
-| `risc-v`      | 🚧 planned                               |                                                     |
-| `javascript`  | 🚧 planned (blazingly fast)              | will be blazingly fast                              |
+| target        | status                                   | notes                               |
+| ------------- | ---------------------------------------- | ----------------------------------- |
+| `interpreter` | 🔥 fully supported                       | has nice debugging capabilities     |
+| `nasm`        | 😀👍 well supported (linux+windows only) | x86\_(32/64), windows is 64bit only |
+| `x86`         | 🚧 planned                               |                                     |
+| `arm`         | 🚧 planned                               |                                     |
+| `risc-v`      | 🚧 planned                               |                                     |
+| `javascript`  | 🚧 planned (blazingly fast)              | will be blazingly fast              |
 
 ## notes
 
 - endianness for `o` intstruction depends on your architecture. it dumps all bits so there most probably will be null bytes too.
 - this is a toy compiler, is statically linked and is limited only by my skill issues
-- `+` an `-` instructions are merged for optimization, and `o` is buffered to `1024` `o` calls by default
 - `freebsd_*` targets are planned to be supported for all architectures but i dont have a way to test it right now, so yeah.
 - compiled assemblies are not guaranteed to follow calling conventions or be thread safe.
 
@@ -58,23 +55,35 @@ notes:
 
 ## features
 
-- dump buffering
-- `inc`/`dec` grouping
-- interpreter and debugging support
+- dump instruction is buffered to every 1024 calls on compiled targets.
+- rich-ish interpreter and debugging support.
+- `+` an `-` instructions are merged for optimization
 
 ## todo
 
 - [x] buffer dumps, 1000 syscalls per second is crazy
-  - [ ] custom buffer size (1028 by default)
-- [ ] targets for nasm
-  - [x] linux
-  - [x] windows
-  - [ ] freebsd
-  - [ ] macos
+  - [ ] custom buffer size (1024 dumps by default)
+- [ ] nasm backend
+  - [x] linux target
+  - [x] windows target
+  - [ ] follow proper call conventions
+  - [ ] templeos target
+  - [ ] freebsd target
+  - [ ] macos target
 - [ ] llvm backend
 - [ ] native backends
-  - [ ] linux
-  - [ ] windows
-  - [ ] freebsd
-  - [ ] macos
-- [ ] javascript (blazingly fast)
+  - [ ] x86_64/x86_32
+    - [ ] linux
+    - [ ] templeos
+    - [ ] windows
+  - [ ] arm
+    - [ ] linux
+    - [ ] templeos
+    - [ ] windows
+  - [ ] risc-v
+    - [ ] linux
+    - [ ] templeos
+    - [ ] windows
+- [ ] javascript backend (blazingly fast)
+
+some backend targets like macos have been omitted.
