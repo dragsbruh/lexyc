@@ -2,17 +2,17 @@
 
 set -euo pipefail
 
-mkdir -p _build/
+mkdir -p _build/deps/
 
 zig build
 
-if [ ! -f _build/xycc ];then
-  repodir="_build/.repo.xy.tmp"
+if [ ! -f _build/deps/xycc ];then
+  repodir="_build/deps/.xy.tmp"
   cwdir=$(pwd)
 
   rm -rf _build/xy $repodir
 
-  git clone https://git.disroot.org/nora.aoki/xy "$repodir"
+  git clone https://git.hearth.is-a.dev/bitpbl/xy.git "$repodir"
   cd $repodir
   meson build
   cd build
@@ -20,10 +20,10 @@ if [ ! -f _build/xycc ];then
 
   cd "$cwdir"
 
-  mv $repodir/build/xycc _build/xycc.tmp
+  mv $repodir/build/xycc _build/deps/xycc.tmp
   rm -rf $repodir
 
-  mv _build/xycc.tmp _build/xycc
+  mv _build/deps/xycc.tmp _build/deps/xycc
 fi;
 
 mkdir -p _build/out/
@@ -33,11 +33,11 @@ mkdir -p _build/out/
 mkdir -p _build/xy
 mkdir -p _build/bin/xy
 
-./_build/xycc examples/helloworld.xy _build/xy/out.ll
+./_build/deps/xycc examples/helloworld.xy _build/xy/out.ll
 clang _build/xy/out.ll -o _build/bin/xy/exe -Wno-override-module
 ./_build/bin/xy/exe > _build/out/xy.txt
 
-./_build/xycc examples/helloworld_loop_compat.xy _build/xy/loop-compat-out.ll
+./_build/deps/xycc examples/helloworld_loop_compat.xy _build/xy/loop-compat-out.ll
 clang _build/xy/loop-compat-out.ll -o _build/bin/xy/loop-compat-exe -Wno-override-module
 
 # interpreter/debug targets

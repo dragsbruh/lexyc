@@ -34,7 +34,6 @@ pub const Target = enum {
     linux_x86_64,
     linux_x86_32,
     windows_x86_64,
-    windows_x86_32,
     debug, // debug is a special target, i only plan to use it with interpreter-debug to get detailed information per-step
 };
 pub const Type = enum { nasm, interpreter, debug };
