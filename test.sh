@@ -34,11 +34,11 @@ mkdir -p _build/xy
 mkdir -p _build/bin/xy
 
 ./_build/deps/xycc examples/helloworld.xy _build/xy/out.ll
-clang _build/xy/out.ll -o _build/bin/xy/exe -Wno-override-module
+clang _build/xy/out.ll -o _build/bin/xy/exe -Wno-override-module -O3
 ./_build/bin/xy/exe > _build/out/xy.txt
 
 ./_build/deps/xycc examples/helloworld_loop.xy _build/xy/loop-out.ll
-clang _build/xy/loop-out.ll -o _build/bin/xy/loop-exe -Wno-override-module
+clang _build/xy/loop-out.ll -o _build/bin/xy/loop-exe -Wno-override-module -O3
 
 # interpreter/debug targets
 
