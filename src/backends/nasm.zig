@@ -81,7 +81,7 @@ pub fn compile(_: std.mem.Allocator, out: *std.Io.Writer, maybe_target: ?Backend
             \\extern ExitProcess
             \\%define xr r12
             \\%define yr r13
-            \\%define bl r14 ; bytes
+            \\%define bl r14d ; bytes
             \\%define tmp r15
             \\%define stdout rbp
             \\%define buf_size {d} ; qwords buf
@@ -91,7 +91,7 @@ pub fn compile(_: std.mem.Allocator, out: *std.Io.Writer, maybe_target: ?Backend
             \\flush:
             \\  mov rcx, stdout
             \\  lea rdx, [ rel outs ]
-            \\  mov r8, bl
+            \\  mov r8d, bl
             \\  mov r9, 0
             \\  mov qword [rsp+32], 0
             \\  sub rsp, 40
@@ -101,7 +101,8 @@ pub fn compile(_: std.mem.Allocator, out: *std.Io.Writer, maybe_target: ?Backend
             \\  ret
             \\print:
             \\  lea tmp, [ rel outs ]
-            \\  mov qword [ tmp + bl ], xr
+            \\  movzx rbx, bl
+            \\  mov qword [ tmp + rbx ], xr
             \\  add bl, 8
             \\  cmp bl, buf_size*8
             \\  jl noflush
