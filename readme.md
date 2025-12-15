@@ -5,15 +5,15 @@
 this is an alternate compiler for a superset of the [xy](https://git.disroot.org/nora.aoki/xy)
 programming language.
 
-| instruction | what is this                                                 |
-| ----------- | ------------------------------------------------------------ |
-| `+`         | increment `x` by 1                                           |
-| `-`         | decrement `x` by 1.                                          |
-| `s`         | swap `x` and `y`                                             |
-| `[`         | if `x == 0`, jump to the instruction after the matching `]`. |
-| `]`         | if `x != 0`, jump to the instruction after the matching `[`  |
-| `o`         | dump all 64 bits of `x` raw to stdout                        |
-| `0`         | set `x` to 0                                                 |
+| instruction | what is this                                                |
+| ----------- | ----------------------------------------------------------- |
+| `+`         | increment `x` by 1                                          |
+| `-`         | decrement `x` by 1.                                         |
+| `s`         | swap `x` and `y`                                            |
+| `[`         | if `x == 0`, jump to the instruction after the matching `]` |
+| `]`         | if `x != 0`, jump to the instruction after the matching `[` |
+| `o`         | dump all 64 bits of `x` raw to stdout                       |
+| `0`         | set `x` to 0                                                |
 
 **notes:**
 
@@ -22,14 +22,14 @@ programming language.
 
 ## compiler targets
 
-| target        | status                              | notes                  |
-| ------------- | ----------------------------------- | ---------------------- |
-| `interpreter` | 🔥 fully supported                  | -                      |
-| `nasm`        | ⚠️ partially supported (linux only) | nasm only supports x86 |
-| `x86`         | 🚧 planned                          |                        |
-| `arm`         | 🚧 planned                          |                        |
-| `risc-v`      | 🚧 planned                          |                        |
-| `javascript`  | 🚧 planned (blazingly fast)         |                        |
+| target        | status                                       | notes                           |
+| ------------- | -------------------------------------------- | ------------------------------- |
+| `interpreter` | 🔥 fully supported                           | has nice debugging capabilities |
+| `nasm`        | ⚠️ partially supported (linux +windows only) | nasm only supports x86(\_64)    |
+| `x86`         | 🚧 planned                                   |                                 |
+| `arm`         | 🚧 planned                                   |                                 |
+| `risc-v`      | 🚧 planned                                   |                                 |
+| `javascript`  | 🚧 planned (blazingly fast)                  | will be blazingly fast          |
 
 ## usage
 
@@ -39,6 +39,7 @@ available backends and their supported targets:
   nasm
     linux_x86_64
     linux_x86_32
+    windows_x86_64
   interpreter
     debug
   debug

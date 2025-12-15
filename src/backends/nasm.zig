@@ -3,21 +3,19 @@ const Ins = @import("../instructions.zig").Ins;
 
 const Backend = @import("../Backend.zig");
 
-pub fn supported() []const Backend.Target {
-    return &[_]Backend.Target{ .linux_x86_64, .linux_x86_32 };
-}
-
 pub fn compile(_: std.mem.Allocator, out: *std.Io.Writer, maybe_target: ?Backend.Target, instructions: []Ins) !void {
     const target = maybe_target orelse return error.RequiresTarget;
+    if (!supports(target)) return error.UnsupportedTarget;
+
+    const buffer_size = 1024;
 
     switch (target) {
         .linux_x86_32 => try out.print(
             \\global _start
-            // we arent using esi or ebp so good
             \\%define xr esi
             \\%define yr ebp
-            \\%define bl edi
-            \\%define buf_size 1024
+            \\%define bl edi ; bytes
+            \\%define buf_size {d} ; dwords in buf
             \\section .bss
             \\  outs resb buf_size
             \\section .text
@@ -30,13 +28,12 @@ pub fn compile(_: std.mem.Allocator, out: *std.Io.Writer, maybe_target: ?Backend
             \\  mov bl, 0
             \\  ret
             \\print:
-            \\  cmp bl, buf_size
-            \\  jng noflush
-            \\  call flush
-            \\  ret
-            \\noflush:
             \\  mov dword [ outs + bl ], xr
             \\  add bl, 4
+            \\  cmp bl, buf_size*4
+            \\  jl noflush
+            \\  call flush
+            \\noflush:
             \\  ret
             \\quit:
             \\  mov eax, 1
@@ -44,13 +41,13 @@ pub fn compile(_: std.mem.Allocator, out: *std.Io.Writer, maybe_target: ?Backend
             \\  int 0x80
             \\_start:
             \\
-        , .{}),
+        , .{buffer_size}),
         .linux_x86_64 => try out.print(
             \\global _start
             \\%define xr r12
             \\%define yr r13
-            \\%define bl r14
-            \\%define buf_size 1024
+            \\%define bl r14 ; bytes
+            \\%define buf_size {d} ; qwords in buf
             \\section .bss
             \\  outs resq buf_size
             \\section .text
@@ -63,13 +60,12 @@ pub fn compile(_: std.mem.Allocator, out: *std.Io.Writer, maybe_target: ?Backend
             \\  mov bl, 0
             \\  ret
             \\print:
-            \\  cmp bl, buf_size
-            \\  jng noflush
-            \\  call flush
-            \\  ret
-            \\noflush:
             \\  mov qword [ outs + bl ], xr
             \\  add bl, 8
+            \\  cmp bl, buf_size*8
+            \\  jl noflush
+            \\  call flush
+            \\noflush:
             \\  ret
             \\quit:
             \\  mov rax, 60
@@ -77,8 +73,55 @@ pub fn compile(_: std.mem.Allocator, out: *std.Io.Writer, maybe_target: ?Backend
             \\  syscall
             \\_start:
             \\
-        , .{}),
-        else => return error.UnsupportedTarget,
+        , .{buffer_size}),
+        .windows_x86_64 => try out.print(
+            \\global mainCRTStartup
+            \\extern GetStdHandle
+            \\extern WriteFile
+            \\extern ExitProcess
+            \\%define xr r12
+            \\%define yr r13
+            \\%define bl r14 ; bytes
+            \\%define tmp r15
+            \\%define stdout rbp
+            \\%define buf_size {d} ; qwords buf
+            \\section .bss
+            \\  outs resq buf_size
+            \\section .text
+            \\flush:
+            \\  mov rcx, stdout
+            \\  lea rdx, [ rel outs ]
+            \\  mov r8, bl
+            \\  mov r9, 0
+            \\  mov qword [rsp+32], 0
+            \\  sub rsp, 40
+            \\  call WriteFile
+            \\  add rsp, 40
+            \\  mov bl, 0
+            \\  ret
+            \\print:
+            \\  lea tmp, [ rel outs ]
+            \\  mov qword [ tmp + bl ], xr
+            \\  add bl, 8
+            \\  cmp bl, buf_size*8
+            \\  jl noflush
+            \\  call flush
+            \\noflush:
+            \\  ret
+            \\quit:
+            \\  xor rcx, rcx
+            \\  sub rsp, 40
+            \\  call ExitProcess
+            \\mainCRTStartup:
+            \\  sub rsp, 40
+            \\  mov rcx, -11
+            \\  call GetStdHandle
+            \\  add rsp, 40
+            \\  mov stdout, rax
+            \\
+        , .{buffer_size}),
+
+        else => return error.Unimplemented,
     }
 
     for (instructions, 0..) |ins, index| {
@@ -110,6 +153,20 @@ pub fn compile(_: std.mem.Allocator, out: *std.Io.Writer, maybe_target: ?Backend
     , .{});
 }
 
+const SupportedTargets = [_]Backend.Target{
+    .linux_x86_64,
+    .linux_x86_32,
+    .windows_x86_64,
+};
+
+pub fn supported() []const Backend.Target {
+    return &SupportedTargets;
+}
+
 pub fn supports(target: ?Backend.Target) bool {
-    return target != null;
+    const t = target orelse return false;
+    inline for (SupportedTargets) |s| {
+        if (s == t) return true;
+    }
+    return false;
 }

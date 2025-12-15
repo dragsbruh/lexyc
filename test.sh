@@ -1,12 +1,12 @@
 #!/usr/bin/bash
 
-set -eu
+set -euo pipefail
 
 mkdir -p _build/
 
 zig build
 
-if [ ! -f _build/xy/xycc ];then
+if [ ! -f _build/xycc ];then
   repodir="_build/.repo.xy.tmp"
   cwdir=$(pwd)
 
@@ -20,49 +20,84 @@ if [ ! -f _build/xy/xycc ];then
 
   cd "$cwdir"
 
-  mkdir -p _build/xy/
-  mv $repodir/build/xycc _build/xy/xycc.tmp
+  mv $repodir/build/xycc _build/xycc.tmp
   rm -rf $repodir
 
-  mv _build/xy/xycc.tmp _build/xy/xycc
+  mv _build/xycc.tmp _build/xycc
 fi;
 
-build_nasm() {
-  local source=$1
-  local target=$2
-  local tag=${3:+${3}-}
-  local is_64=${4:-0}
+mkdir -p _build/out/
 
-  local nasm_format="elf32"
-  local ld_format="elf_i386"
-  if (( is_64 )); then
-    nasm_format="elf64"
-    ld_format="elf_x86_64"
-  fi
+# original xycc
 
-  mkdir -p "_build/nasm-$target"
+mkdir -p _build/xy
+mkdir -p _build/bin/xy
 
-  ./zig-out/bin/lexyc "$source" "nasm-$target" "_build/nasm-$target/${tag}asm.s"
-  nasm -f "$nasm_format" "_build/nasm-${target}/${tag}asm.s" -o "_build/nasm-$target/${tag}obj.o"
-  ld -m "$ld_format" "_build/nasm-$target/${tag}obj.o" -o "_build/nasm-$target/${tag}exe"
-}
+./_build/xycc examples/helloworld.xy _build/xy/out.ll
+clang _build/xy/out.ll -o _build/bin/xy/exe -Wno-override-module
+./_build/bin/xy/exe > _build/out/xy.txt
 
-./_build/xy/xycc examples/helloworld.xy _build/xy/out.ll
-clang _build/xy/out.ll -o _build/xy/exe -Wno-override-module
-./_build/xy/exe > _build/xy.txt
+./_build/xycc examples/helloworld_loop_compat.xy _build/xy/loop-compat-out.ll
+clang _build/xy/loop-compat-out.ll -o _build/bin/xy/loop-compat-exe -Wno-override-module
 
-./_build/xy/xycc examples/helloworld_loop_compat.xy _build/xy/loop-out.ll
-clang _build/xy/loop-out.ll -o _build/xy/loop-exe -Wno-override-module
+# interpreter/debug targets
 
-./zig-out/bin/lexyc examples/helloworld.xy debug _build/debug.txt
-./zig-out/bin/lexyc examples/helloworld.xy interpreter _build/interpreter.txt
+./zig-out/bin/lexyc examples/helloworld.xy debug _build/out/debug.txt
+./zig-out/bin/lexyc examples/helloworld.xy interpreter _build/out/interpreter.txt
+./zig-out/bin/lexyc examples/helloworld.xy interpreter-debug _build/out/interpreter-debug.txt
 
-build_nasm examples/helloworld.xy linux_x86_64 "" 1
-./_build/nasm-linux_x86_64/exe > _build/nasm-linux_x86_64.txt
+# nasm
 
-build_nasm examples/helloworld_loop.xy linux_x86_64 "loop" 1
+## linux_x86_64
 
-build_nasm examples/helloworld.xy linux_x86_32 "" 0
-./_build/nasm-linux_x86_32/exe > _build/nasm-linux_x86_32.txt
+mkdir -p _build/nasm-linux_x86_64/
+mkdir -p _build/bin/nasm-linux_x86_64/
 
-build_nasm examples/helloworld_loop.xy linux_x86_32 "loop" 0
+./zig-out/bin/lexyc examples/helloworld.xy nasm-linux_x86_64 _build/nasm-linux_x86_64/asm.s
+nasm -f elf64 _build/nasm-linux_x86_64/asm.s -o _build/nasm-linux_x86_64/obj.o
+ld _build/nasm-linux_x86_64/obj.o -o _build/bin/nasm-linux_x86_64/exe
+./_build/bin/nasm-linux_x86_64/exe > _build/out/nasm-linux_x86_64.txt
+
+./zig-out/bin/lexyc examples/helloworld_loop.xy nasm-linux_x86_64 _build/nasm-linux_x86_64/loop-asm.s
+nasm -f elf64 _build/nasm-linux_x86_64/loop-asm.s -o _build/nasm-linux_x86_64/loop-obj.o
+ld _build/nasm-linux_x86_64/loop-obj.o -o _build/bin/nasm-linux_x86_64/loop-exe
+
+./zig-out/bin/lexyc examples/helloworld_loop_compat.xy nasm-linux_x86_64 _build/nasm-linux_x86_64/loop-compat-asm.s
+nasm -f elf64 _build/nasm-linux_x86_64/loop-compat-asm.s -o _build/nasm-linux_x86_64/loop-compat-obj.o
+ld _build/nasm-linux_x86_64/loop-compat-obj.o -o _build/bin/nasm-linux_x86_64/loop-compat-exe
+
+## linux_x86_32
+
+mkdir -p _build/nasm-linux_x86_32/
+mkdir -p _build/bin/nasm-linux_x86_32/
+
+./zig-out/bin/lexyc examples/helloworld.xy nasm-linux_x86_32 _build/nasm-linux_x86_32/asm.s
+nasm -f elf32 _build/nasm-linux_x86_32/asm.s -o _build/nasm-linux_x86_32/obj.o
+ld -m elf_i386 _build/nasm-linux_x86_32/obj.o -o _build/bin/nasm-linux_x86_32/exe
+./_build/bin/nasm-linux_x86_32/exe > _build/out/nasm-linux_x86_32.txt
+
+./zig-out/bin/lexyc examples/helloworld_loop.xy nasm-linux_x86_32 _build/nasm-linux_x86_32/loop-asm.s
+nasm -f elf32 _build/nasm-linux_x86_32/loop-asm.s -o _build/nasm-linux_x86_32/loop-obj.o
+ld -m elf_i386 _build/nasm-linux_x86_32/loop-obj.o -o _build/bin/nasm-linux_x86_32/loop-exe
+
+./zig-out/bin/lexyc examples/helloworld_loop_compat.xy nasm-linux_x86_32 _build/nasm-linux_x86_32/loop-compat-asm.s
+nasm -f elf32 _build/nasm-linux_x86_32/loop-compat-asm.s -o _build/nasm-linux_x86_32/loop-compat-obj.o
+ld -m elf_i386 _build/nasm-linux_x86_32/loop-compat-obj.o -o _build/bin/nasm-linux_x86_32/loop-compat-exe
+
+## windows_x86_64
+
+mkdir -p _build/nasm-windows_x86_64/
+mkdir -p _build/bin/nasm-windows_x86_64/
+
+./zig-out/bin/lexyc examples/helloworld.xy nasm-windows_x86_64 _build/nasm-windows_x86_64/asm.s
+nasm -f win64 _build/nasm-windows_x86_64/asm.s -o _build/nasm-windows_x86_64/obj.o
+x86_64-w64-mingw32-gcc _build/nasm-windows_x86_64/obj.o -o _build/bin/nasm-windows_x86_64/exe.exe -nostartfiles -lkernel32
+wine ./_build/bin/nasm-windows_x86_64/exe.exe > _build/out/nasm-windows_x86_64.txt
+
+./zig-out/bin/lexyc examples/helloworld_loop.xy nasm-windows_x86_64 _build/nasm-windows_x86_64/loop-asm.s
+nasm -f win64 _build/nasm-windows_x86_64/loop-asm.s -o _build/nasm-windows_x86_64/loop-obj.o
+x86_64-w64-mingw32-gcc _build/nasm-windows_x86_64/loop-obj.o -o _build/bin/nasm-windows_x86_64/loop-exe.exe -nostartfiles -lkernel32
+
+./zig-out/bin/lexyc examples/helloworld_loop_compat.xy nasm-windows_x86_64 _build/nasm-windows_x86_64/loop-compat-asm.s
+nasm -f win64 _build/nasm-windows_x86_64/loop-compat-asm.s -o _build/nasm-windows_x86_64/loop-compat-obj.o
+x86_64-w64-mingw32-gcc _build/nasm-windows_x86_64/loop-compat-obj.o -o _build/bin/nasm-windows_x86_64/loop-compat-exe.exe -nostartfiles -lkernel32
