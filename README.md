@@ -24,6 +24,12 @@ this is an alternate compiler for the turing-complete [xy](https://git.disroot.o
 | `risc-v`      | 🚧 planned                               |                                     |
 | `javascript`  | 🚧 planned (blazingly fast)              | will be blazingly fast              |
 
+## features
+
+- dump instruction is buffered to every 1024 calls on compiled targets.
+- rich-ish interpreter and debugging support.
+- `+` an `-` instructions are merged for optimization
+
 ## notes
 
 - endianness for `o` intstruction depends on your architecture. it dumps all bits so there most probably will be null bytes too.
@@ -53,12 +59,6 @@ notes:
   outfile is optional, it will default to stdout
 ```
 
-## features
-
-- dump instruction is buffered to every 1024 calls on compiled targets.
-- rich-ish interpreter and debugging support.
-- `+` an `-` instructions are merged for optimization
-
 ## todo
 
 - [x] buffer dumps, 1000 syscalls per second is crazy
@@ -87,3 +87,7 @@ notes:
 - [ ] javascript backend (blazingly fast)
 
 some backend targets like macos have been omitted.
+
+## license
+
+this project is licensed under the [BSD 2-Clause](./LICENSE) license.
