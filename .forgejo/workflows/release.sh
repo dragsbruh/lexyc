@@ -8,21 +8,15 @@ REFNAME="${REFNAME:-HEAD}"
 
 mkdir -p "$OUT_DIR"
 
-prev_tag=$(
-  git tag --list 'v*' --sort=-v:refname \
-  | grep -vx "$REFNAME" \
-  | head -n1 || true
-)
+prev_tag=$(git tag --list 'v*' --sort=-v:refname | grep -vx "$REFNAME" | head -n1 || true)
 
 if [ -n "$prev_tag" ]; then
-  range="$prev_tag..$REFNAME"
+    range="$prev_tag..$REFNAME"
 else
-  range="$REFNAME"
+    range="$REFNAME"
 fi
 
-echo "creating changelog from range $range"
-
-echo "# changelog:" > "$CHANGELOG"
+echo "# changelog" > "$CHANGELOG"
 echo >> "$CHANGELOG"
 git log "$range" --pretty=format:"- %s" >> "$CHANGELOG"
 
