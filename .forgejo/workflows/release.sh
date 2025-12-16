@@ -20,7 +20,7 @@ echo "# changelog" > "$CHANGELOG"
 echo >> "$CHANGELOG"
 git log "$range" --pretty=format:"- %s" >> "$CHANGELOG"
 
-echo "changelog written to $CHANGELOG"
+echo "changelog written for range $range to $CHANGELOG"
 
 for target in "$IN_DIR"/*; do
     [ -d "$target" ] || continue
