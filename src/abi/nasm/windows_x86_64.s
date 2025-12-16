@@ -6,51 +6,51 @@ extern ExitProcess
 
 %define xr r12
 %define yr r13
-%define bl r14d ; bytes
-%define tmp r15
-%define stdout rbp
-%define buf_size 1024 ; qwords buf
+
+%define buf_len r14 ; bytes
+%define buf_size 1024 ; qwords in buf
 
 section .bss
   outs resq buf_size
 
-  section .text
+section .text
+
 flush:
-  mov rcx, stdout
-  lea rdx, [ rel outs ]
-  mov r8d, bl
-  mov r9, 0
-  mov qword [rsp+32], 0
+  mov rcx, [rsp+8] ; stdout FIXME: this is too hard of a dependence on stdout being on rsp+8 probably?
+  lea rdx, [rel outs] ; buffer
+  mov r8, buf_len ; bytes to write ; param is a dword (r8d) so it gets truncated but ig its fine
+  mov r9, 0 ; ptr bytes written
+  ; mov qword [rsp+32], 0 ; ptr overlapped ; probably unnecessary
+
   sub rsp, 40
   call WriteFile
   add rsp, 40
-  mov bl, 0
+
+  mov buf_len, 0
   ret
 
 print:
-  lea tmp, [ rel outs ]
-  movzx rbx, bl
-  mov qword [ tmp + rbx ], xr
-  add bl, 8
-  cmp bl, buf_size*8
-  jl noflush
-  call flush
-noflush:
+  lea rax, [ rel outs ]
+  mov qword [ rax + buf_len ], xr
+  add buf_len, 8
+  cmp buf_len, buf_size*8
+  jge flush  ; flush does a ret for us yey, important btw dont change to call.
   ret
-
-quit:
-  xor rcx, rcx
-  sub rsp, 40
-  call ExitProcess
 
 mainCRTStartup:
   sub rsp, 40
   mov rcx, -11
   call GetStdHandle
-  add rsp, 40
-  mov stdout, rax
+  add rsp, 32 ; we push later
+  push rax
+
   mov xr, 0
   mov yr, 0
+
 ;stub
+
   call flush
-  jmp quit
+
+  xor rcx, rcx
+  sub rsp, 40
+  call ExitProcess
