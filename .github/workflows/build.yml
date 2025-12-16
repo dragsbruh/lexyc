@@ -1,0 +1,55 @@
+name: release binaries
+
+on:
+  push:
+    tags:
+      - v*
+
+env:
+  ZIG_URL: https://zigmirror.com/zig-x86_64-linux-0.15.2.tar.xz
+  ZIG_DIR: /opt/zig/0.15.2
+  ZIG_VERSION: 0.15.2
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: cache zig
+        id: cache-zig
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.ZIG_DIR }}
+          key: zig-${{ env.ZIG_VERSION }}-${{ runner.os }}
+
+      - name: download zig
+        if: steps.cache-zig.outputs.cache-hit != 'true'
+        run: |
+          wget -q ${{ env.ZIG_URL }}
+          tar -xJf zig-x86_64-linux-0.15.2.tar.xz
+          mkdir -p ${{ env.ZIG_DIR }}
+          mv zig-x86_64-linux-0.15.2/* ${{ env.ZIG_DIR }}
+
+      - run: sudo ln -s ${{ env.ZIG_DIR }}/zig /usr/bin/zig
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: cross compile
+        run: zig build cross -Doptimize=ReleaseSafe --summary all
+
+      - name: create release artifacts and changelog
+        run: bash .forgejo/workflows/release.sh
+        env:
+          OUT_DIR: _release/assets/
+          CHANGELOG: _release/CHANGELOG.md
+          REFNAME: ${{ github.ref_name }}
+
+      - name: create github release
+        uses: ncipollo/release-action@v1
+        with:
+          name: "lexyc ${{ github.ref_name }}"
+          bodyFile: ${{ github.workspace }}/_release/CHANGELOG.md
+          artifacts: _release/assets/*
