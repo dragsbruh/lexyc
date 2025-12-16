@@ -8,10 +8,13 @@ extern ExitProcess
 %define yr r13
 
 %define buf_len r14 ; bytes
-%define buf_size 1024 ; qwords in buf
+
+%ifndef BUF_SIZE
+  %define BUF_SIZE 1024 ; qwords in buf
+%endif
 
 section .bss
-  outs resq buf_size
+  outs resq BUF_SIZE
 
 section .text
 
@@ -33,7 +36,7 @@ print:
   lea rax, [ rel outs ]
   mov qword [ rax + buf_len ], xr
   add buf_len, 8
-  cmp buf_len, buf_size*8
+  cmp buf_len, BUF_SIZE*8
   jge flush  ; flush does a ret for us yey, important btw dont change to call.
   ret
 

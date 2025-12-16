@@ -4,10 +4,12 @@ global _start
 %define yr r13
 %define bl r14 ; bytes
 
-%define buf_size 1024 ; qwords in buf
+%ifndef BUF_SIZE
+  %define BUF_SIZE 1024 ; qwords in buf
+%endif
 
 section .bss
-  outs resq buf_size
+  outs resq BUF_SIZE
 
 section .text
 flush:
@@ -22,7 +24,7 @@ flush:
 print:
   mov qword [ outs + bl ], xr
   add bl, 8
-  cmp bl, buf_size*8
+  cmp bl, BUF_SIZE*8
   jl noflush
   call flush
 noflush:
