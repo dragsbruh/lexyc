@@ -37,6 +37,9 @@ jobs:
       - run: ln -s ${{ env.ZIG_DIR }}/zig /usr/bin/zig
 
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: cross compile
         run: zig build cross -Doptimize=ReleaseSafe --summary all
