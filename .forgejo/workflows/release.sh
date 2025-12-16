@@ -18,7 +18,7 @@ fi
 
 echo "# changelog" > "$CHANGELOG"
 echo >> "$CHANGELOG"
-git log "$range" --pretty=format:"- %s" >> "$CHANGELOG"
+git log "$range" --pretty=format:"- %s" | grep -vE "^- (ci:|docs:)" >> "$CHANGELOG"
 
 echo "changelog written for range $range to $CHANGELOG"
 
