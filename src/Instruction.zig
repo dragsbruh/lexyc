@@ -7,7 +7,7 @@ pos: Position,
 
 pub const Position = struct {
     index: usize = 0,
-    len: usize = 0,
+    len: usize = 1,
     line: usize = 0,
     line_index: usize = 0,
 };

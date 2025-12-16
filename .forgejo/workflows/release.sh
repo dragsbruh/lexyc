@@ -62,5 +62,4 @@ echo "release artifacts written to $OUT_DIR/"
   echo "## downloads"
   echo
   echo "most of these are exotic but might work, lmk if any of them dont work on their advertised os+arch combo"
-  echo
 } >> "$CHANGELOG"
