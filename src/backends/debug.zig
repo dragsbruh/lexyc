@@ -1,9 +1,9 @@
 const std = @import("std");
 
 const Backend = @import("../Backend.zig");
-const Ins = @import("../instructions.zig").Ins;
+const Instruction = @import("../Instruction.zig");
 
-pub fn compile(_: std.mem.Allocator, out: *std.Io.Writer, maybe_target: ?Backend.Target, instructions: []Ins) !void {
+pub fn compile(_: std.mem.Allocator, out: *std.Io.Writer, maybe_target: ?Backend.Target, instructions: []Instruction) !void {
     if (maybe_target) |_| return error.UnsupportedTarget;
 
     for (instructions, 0..) |ins, i| try ins.debug(out, i);

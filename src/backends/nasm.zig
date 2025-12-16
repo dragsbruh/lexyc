@@ -1,9 +1,9 @@
 const std = @import("std");
-const Ins = @import("../instructions.zig").Ins;
+const Instruction = @import("../Instruction.zig");
 
 const Backend = @import("../Backend.zig");
 
-pub fn compile(_: std.mem.Allocator, out: *std.Io.Writer, maybe_target: ?Backend.Target, instructions: []Ins) !void {
+pub fn compile(_: std.mem.Allocator, out: *std.Io.Writer, maybe_target: ?Backend.Target, instructions: []Instruction) !void {
     const target = maybe_target orelse return error.RequiresTarget;
     if (!supports(target)) return error.UnsupportedTarget;
 
@@ -125,8 +125,8 @@ pub fn compile(_: std.mem.Allocator, out: *std.Io.Writer, maybe_target: ?Backend
         else => return error.Unimplemented,
     }
 
-    for (instructions, 0..) |ins, index| {
-        try switch (ins) {
+    for (instructions, 0..) |instruction, index| {
+        try switch (instruction.type) {
             .inc => |amount| out.print("  add xr, {d}\n", .{amount}),
             .dec => |amount| out.print("  sub xr, {d}\n", .{amount}),
             .swap => out.print("  xchg xr, yr\n", .{}),

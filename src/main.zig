@@ -1,6 +1,6 @@
 const std = @import("std");
 
-const tokenize = @import("instructions.zig").tokenize;
+const Instruction = @import("Instruction.zig");
 const Backend = @import("Backend.zig");
 
 pub fn main() !u8 {
@@ -83,12 +83,12 @@ pub fn main() !u8 {
 
     defer if (out_path) |_| out_file.close();
 
-    const instructions = switch (try tokenize(allocator, source, null)) {
-        .Error => |err| {
-            std.debug.print("error in code: {s} at position {d}\n", .{ @tagName(err.type), err.index });
+    const instructions = switch (try Instruction.eatAll(allocator, source)) {
+        .err => |err| {
+            std.debug.print("error in code: {s} at line {d} column {d}\n", .{ @tagName(err.type), err.pos.line, err.pos.line_index });
             return 1;
         },
-        .Result => |res| res.instructions,
+        .ok => |instructions| instructions,
     };
     defer allocator.free(instructions);
 

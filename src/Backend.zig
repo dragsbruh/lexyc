@@ -1,5 +1,7 @@
 const std = @import("std");
 
+pub const Instruction = @import("Instruction.zig");
+
 const Backend = @This();
 
 pub const backends = struct {
@@ -28,8 +30,6 @@ pub const backends = struct {
     };
 };
 
-pub const Ins = @import("instructions.zig").Ins;
-
 pub const Target = enum {
     linux_x86_64,
     linux_x86_32,
@@ -38,7 +38,7 @@ pub const Target = enum {
 };
 pub const Type = enum { nasm, interpreter, debug };
 
-compile: *const fn (allocator: std.mem.Allocator, writer: *std.Io.Writer, target: ?Target, instructions: []Ins) anyerror!void,
+compile: *const fn (allocator: std.mem.Allocator, writer: *std.Io.Writer, target: ?Target, instructions: []Instruction) anyerror!void,
 supports: *const fn (target: ?Target) bool,
 supported: *const fn () []const Target,
 

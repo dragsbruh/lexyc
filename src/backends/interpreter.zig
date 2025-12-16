@@ -1,17 +1,17 @@
 const std = @import("std");
 
-const Ins = @import("../instructions.zig").Ins;
+const Instruction = @import("../Instruction.zig");
 const Backend = @import("../Backend.zig");
 
 index: usize,
-instructions: []const Ins,
+instructions: []const Instruction,
 
 x: usize,
 y: usize,
 
 write_debug: bool,
 
-pub fn new(instructions: []const Ins) @This() {
+pub fn new(instructions: []const Instruction) @This() {
     return .{
         .index = 0,
         .instructions = instructions,
@@ -22,7 +22,7 @@ pub fn new(instructions: []const Ins) @This() {
 }
 
 pub fn debug(self: @This(), out: *std.Io.Writer) !void {
-    try out.print("\tdbg: x=`{d}`,y=`{d}`\n", .{ self.x, self.y });
+    try out.print("\tstate: x=`{d}`,y=`{d}`\n", .{ self.x, self.y });
 }
 
 pub fn step(self: *@This(), out: *std.Io.Writer) !bool {
@@ -33,7 +33,7 @@ pub fn step(self: *@This(), out: *std.Io.Writer) !bool {
         try self.debug(out);
     }
 
-    switch (current) {
+    switch (current.type) {
         .inc => |amount| self.x += amount,
         .dec => |amount| self.x -= amount,
         .swap => {
@@ -63,7 +63,7 @@ pub fn complete(self: *@This(), out: *std.Io.Writer) !void {
     if (self.write_debug) try self.debug(out);
 }
 
-pub fn compile(_: std.mem.Allocator, out: *std.Io.Writer, maybe_target: ?Backend.Target, instructions: []Ins) !void {
+pub fn compile(_: std.mem.Allocator, out: *std.Io.Writer, maybe_target: ?Backend.Target, instructions: []Instruction) !void {
     const is_debug = if (maybe_target) |target| blk: {
         if (target != .debug) return error.UnsupportedTarget;
         break :blk true;
