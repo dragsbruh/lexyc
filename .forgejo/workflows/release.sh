@@ -17,13 +17,17 @@ else
 fi
 
 {
-  echo "# changelog"
+  echo "# lexyc $REFNAME"
+  echo
+  echo "## changelog"
   echo
   git log "$range" --pretty=format:"- %s"
   echo
 } > "$CHANGELOG"
 
 echo "changelog written for range $range to $CHANGELOG"
+
+declare -A os_targets
 
 for target in "$IN_DIR"/*; do
     [ -d "$target" ] || continue
@@ -48,6 +52,15 @@ for target in "$IN_DIR"/*; do
     cp "$exe" "$raw"
     chmod +x "$raw" || true
     zstd -9 -f "$raw" -o "$raw.zst"
+    os_targets["$os"]+="$arch "
 done
 
 echo "release artifacts written to $OUT_DIR/"
+
+{
+  echo
+  echo "## downloads"
+  echo
+  echo "most of these are exotic but might work, lmk if any of them dont work on their advertised os+arch combo"
+  echo
+} >> "$CHANGELOG"
